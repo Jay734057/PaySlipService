@@ -2,6 +2,7 @@
 using Cw.PayslipService.Dtos;
 using Cw.PayslipService.Interfaces;
 using Cw.PayslipService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -21,6 +22,7 @@ namespace Cw.PayslipService.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("submit")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]

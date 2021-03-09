@@ -12,6 +12,7 @@ namespace Cw.PayslipService
 
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<Payslip> Payslips { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

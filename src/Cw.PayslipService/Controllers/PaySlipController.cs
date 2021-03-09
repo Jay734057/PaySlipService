@@ -2,12 +2,14 @@
 using Cw.PayslipService.Dtos;
 using Cw.PayslipService.Interfaces;
 using Cw.PayslipService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 
 namespace Cw.PayslipService.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("[controller]")]
     [ApiController]

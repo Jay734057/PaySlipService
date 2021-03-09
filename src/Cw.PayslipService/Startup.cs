@@ -1,13 +1,18 @@
 using Cw.PayslipService.Interfaces;
 using Cw.PayslipService.Models;
 using Cw.PayslipService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Cw.PayslipService
 {
@@ -25,11 +30,65 @@ namespace Cw.PayslipService
             services.AddAutoMapper(typeof(Startup));
 
             services.AddControllers();
+
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+            //setup authentication scheme
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        //verify the user does exist in the system
+                        var userService = context.HttpContext.RequestServices
+                                                 .GetRequiredService<IUserService>();
+                        var userId = Convert.ToInt32(context.Principal.Identity.Name);
+                        var user = userService.GetUserById(userId);
+                        if (user == null)
+                        {
+                            context.Fail("Unauthorized");
+                        }
+
+                        if (user.IsAdmin)
+                        {
+                            var claims = new List<Claim>
+                            {
+                                new Claim(ClaimTypes.Role, "Admin")
+                            };
+                            var appIdentity = new ClaimsIdentity(claims);
+                            context.Principal.AddIdentity(appIdentity);
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
             services.AddSwaggerDocument();
             services.AddDbContext<ServiceContext>(opt => opt.UseInMemoryDatabase("PaySlipDatabase"));
 
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IPaySlipService, PaySlipService>();
+            services.AddScoped<IUserService, UserService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
@@ -44,6 +103,7 @@ namespace Cw.PayslipService
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -104,6 +164,29 @@ namespace Cw.PayslipService
                 EmployeeA,
                 EmployeeB,
                 EmployeeC
+            });
+
+            
+            var user = new User()
+            {
+                Id = 1,
+                UserName = "user",
+                Password = "password",
+                IsAdmin = false
+            };
+
+            var admin = new User()
+            {
+                Id = 2,
+                UserName = "admin",
+                Password = "password",
+                IsAdmin = true
+            };
+
+            context.AddRange(new List<User>
+            {
+                user,
+                admin
             });
 
             context.SaveChanges();

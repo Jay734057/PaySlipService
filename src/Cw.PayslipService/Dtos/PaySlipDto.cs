@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 
-namespace Cw.PayslipService.Models
+namespace Cw.PayslipService.Dtos
 {
-    public class Payslip
+    public class PaySlipDto
     {
         public int Id { get; set; }
         public DateTime PayDate { get; set; }
-
         public double Gross { get; set; }
         public double Tax { get; set; }
         public double NetIncome { get; set; }
-
         public int EmployeeId { get; set; }
-        public Employee Employee { get; set; }
     }
 }

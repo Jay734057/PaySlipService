@@ -1,4 +1,5 @@
-﻿using Cw.PayslipService.Interfaces;
+﻿using Cw.PayslipService.Dtos;
+using Cw.PayslipService.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +18,14 @@ namespace Cw.PayslipService.Controllers
         [HttpGet("authenticate")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public IActionResult AuthenticateUser(string userName, string password)
+        public IActionResult AuthenticateUser(UserDto userDto)
         {
-            var token = _userService.ValidateCredentials(userName, password);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var token = _userService.ValidateCredentials(userDto.Username, userDto.Password);
 
             if (token == null)
             {

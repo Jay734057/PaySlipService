@@ -37,7 +37,7 @@ namespace Cw.PayslipService.Services
             }
             else
             {
-                return JwtProvider.GenerateJWTToken(user.Id, _appSettings.Secret);
+                return JwtProvider.GenerateJWTToken(user.Id, user.IsAdmin, _appSettings.Secret);
             }
         }
     }

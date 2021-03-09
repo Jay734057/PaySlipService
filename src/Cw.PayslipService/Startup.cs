@@ -59,16 +59,6 @@ namespace Cw.PayslipService
                             context.Fail("Unauthorized");
                         }
 
-                        if (user.IsAdmin)
-                        {
-                            var claims = new List<Claim>
-                            {
-                                new Claim(ClaimTypes.Role, "Admin")
-                            };
-                            var appIdentity = new ClaimsIdentity(claims);
-                            context.Principal.AddIdentity(appIdentity);
-                        }
-
                         return Task.CompletedTask;
                     }
                 };

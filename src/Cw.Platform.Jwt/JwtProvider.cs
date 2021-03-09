@@ -12,14 +12,18 @@ namespace Cw.Platform.Jwt
         private static readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
 
         // Generate token method
-        public static string GenerateJWTToken(int userId, string secret)
+        public static string GenerateJWTToken(int userId, bool isAdmin, string secret)
         {
             var key = Encoding.ASCII.GetBytes(secret);
 
-            //set the claim identity name as user id
             var claims = new List<Claim>(){
                 new Claim(ClaimTypes.Name, userId.ToString())
             };
+
+            if (isAdmin)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
 
             //setup token with claims, validation period and signing credentials
             var tokenDescriptor = new SecurityTokenDescriptor

@@ -16,3 +16,9 @@ Payslip service is REST API that has two functionalities
 * Use your own suppositions to implement the service and test it
 * Don't spend long time on repeated things (like lengthy tests)
 * Create PR
+
+#Test Credentials
+
+* Normal User Credentials: username: user, password: password
+* Admin Credential: username: admin, password: password
+* To Add new test credentials: add credentials in SeedData method in Startup.cs
